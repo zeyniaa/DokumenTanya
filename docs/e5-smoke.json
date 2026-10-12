@@ -1,0 +1,7 @@
+{
+  "mode": "e5_qdrant",
+  "passed": true,
+  "dimensions": 384,
+  "scope_filter": true,
+  "seconds": 180.96
+}

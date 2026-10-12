@@ -1,0 +1,147 @@
+{
+  "dataset": "synthetic-demo-v1",
+  "config": {
+    "parser": "pdfplumber",
+    "ocr_enabled": false,
+    "embedding": "none",
+    "provider": "extractive",
+    "max_upload_mb": 20,
+    "max_pages": 50,
+    "job_backend": "local",
+    "retrieval_mode": "hybrid"
+  },
+  "count": 8,
+  "checks_passed": 7,
+  "median_seconds": 0.101,
+  "results": [
+    {
+      "question": "Apa persyaratan pengajuan cuti?",
+      "answer_contains": "CA-01",
+      "pages": [
+        1
+      ],
+      "category": "text",
+      "passed": true,
+      "seconds": 0.103,
+      "answer": "Panduan Administrasi Akademik DOKUMEN DEMO SINTETIS - bukan kebijakan kampus nyata. 1. Pengajuan cuti akademik Mahasiswa mengajukan cuti melalui formulir CA-01. Persyaratan pengajuan cuti adalah surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Pengajuan diterima paling lambat 14 hari sebelum semester dimulai. Proses verifikasi pengajuan cuti membutuhkan 5 hari kerja setelah dokumen lengkap diterima. Cuti dapat diberikan maksimal dua semester berturut-turut. Panduan ini tidak menetapkan batas semester minimum untuk mengajukan cuti. 2. Biaya layanan administrasi [1]\n\n3. Pengembalian biaya Biaya dapat dikembalikan jika layanan belum diproses. Pemohon melampirkan nomor permohonan dan bukti pembayaran. Pengembalian diselesaikan dalam 7 hari kerja setelah permohonan disetujui. 4. Kontak layanan Layanan administrasi buka Senin sampai Jumat, pukul 08.00-16.00. Pertanyaan disampaikan melalui loket administrasi. Dokumen ini tidak mencantumkan nomor telepon atau alamat email. 5. Catatan penggunaan Semua nama layanan, biaya, waktu, dan persyaratan pada dokumen ini dibuat khusus untuk demonstrasi dan pengujian aplikasi DokumenTanya. [2]",
+      "status": "answered",
+      "source_pages": [
+        1,
+        2
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Berapa lama verifikasi cuti?",
+      "answer_contains": "5 hari",
+      "pages": [
+        1
+      ],
+      "category": "text",
+      "passed": true,
+      "seconds": 0.107,
+      "answer": "Panduan Administrasi Akademik DOKUMEN DEMO SINTETIS - bukan kebijakan kampus nyata. 1. Pengajuan cuti akademik Mahasiswa mengajukan cuti melalui formulir CA-01. Persyaratan pengajuan cuti adalah surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Pengajuan diterima paling lambat 14 hari sebelum semester dimulai. Proses verifikasi pengajuan cuti membutuhkan 5 hari kerja setelah dokumen lengkap diterima. Cuti dapat diberikan maksimal dua semester berturut-turut. Panduan ini tidak menetapkan batas semester minimum untuk mengajukan cuti. 2. Biaya layanan administrasi [1]\n\nLayanan: Surat aktif kuliah | Biaya administrasi (Rp): 25.000 | Lama proses (hari): 2 Layanan: Legalisasi dokumen | Biaya administrasi (Rp): 40.000 | Lama proses (hari): 3 Layanan: Surat rekomendasi | Biaya administrasi (Rp): 15.000 | Lama proses (hari): 4 [2]",
+      "status": "answered",
+      "source_pages": [
+        1,
+        1
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Kapan batas pengajuan cuti?",
+      "answer_contains": "14 hari",
+      "pages": [
+        1
+      ],
+      "category": "text",
+      "passed": true,
+      "seconds": 0.123,
+      "answer": "Panduan Administrasi Akademik DOKUMEN DEMO SINTETIS - bukan kebijakan kampus nyata. 1. Pengajuan cuti akademik Mahasiswa mengajukan cuti melalui formulir CA-01. Persyaratan pengajuan cuti adalah surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Pengajuan diterima paling lambat 14 hari sebelum semester dimulai. Proses verifikasi pengajuan cuti membutuhkan 5 hari kerja setelah dokumen lengkap diterima. Cuti dapat diberikan maksimal dua semester berturut-turut. Panduan ini tidak menetapkan batas semester minimum untuk mengajukan cuti. 2. Biaya layanan administrasi [1]",
+      "status": "answered",
+      "source_pages": [
+        1
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Berapa lama pengembalian biaya?",
+      "answer_contains": "7 hari",
+      "pages": [
+        2
+      ],
+      "category": "text",
+      "passed": true,
+      "seconds": 0.092,
+      "answer": "Layanan: Surat aktif kuliah | Biaya administrasi (Rp): 25.000 | Lama proses (hari): 2 Layanan: Legalisasi dokumen | Biaya administrasi (Rp): 40.000 | Lama proses (hari): 3 Layanan: Surat rekomendasi | Biaya administrasi (Rp): 15.000 | Lama proses (hari): 4 [1]\n\n3. Pengembalian biaya Biaya dapat dikembalikan jika layanan belum diproses. Pemohon melampirkan nomor permohonan dan bukti pembayaran. Pengembalian diselesaikan dalam 7 hari kerja setelah permohonan disetujui. 4. Kontak layanan Layanan administrasi buka Senin sampai Jumat, pukul 08.00-16.00. Pertanyaan disampaikan melalui loket administrasi. Dokumen ini tidak mencantumkan nomor telepon atau alamat email. 5. Catatan penggunaan Semua nama layanan, biaya, waktu, dan persyaratan pada dokumen ini dibuat khusus untuk demonstrasi dan pengujian aplikasi DokumenTanya. [2]\n\nPanduan Administrasi Akademik DOKUMEN DEMO SINTETIS - bukan kebijakan kampus nyata. 1. Pengajuan cuti akademik Mahasiswa mengajukan cuti melalui formulir CA-01. Persyaratan pengajuan cuti adalah surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Pengajuan diterima paling lambat 14 hari sebelum semester dimulai. Proses verifikasi pengajuan cuti membutuhkan 5 hari kerja setelah dokumen lengkap diterima. Cuti dapat diberikan maksimal dua semester berturut-turut. Panduan ini tidak menetapkan batas semester minimum untuk mengajukan cuti. 2. Biaya layanan administrasi [3]",
+      "status": "answered",
+      "source_pages": [
+        1,
+        2,
+        1
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Berapa total biaya administrasi?",
+      "answer_contains": "80.000",
+      "pages": [
+        1
+      ],
+      "category": "calculation",
+      "passed": true,
+      "seconds": 0.092,
+      "answer": "Total Biaya administrasi (Rp): 80.000 (rupiah). Dihitung dengan kode dari 3 sel. [1]",
+      "status": "answered",
+      "source_pages": [
+        1
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Berapa biaya legalisasi dokumen?",
+      "answer_contains": "40.000",
+      "pages": [
+        1
+      ],
+      "category": "table",
+      "passed": true,
+      "seconds": 0.1,
+      "answer": "Layanan: Surat aktif kuliah | Biaya administrasi (Rp): 25.000 | Lama proses (hari): 2 Layanan: Legalisasi dokumen | Biaya administrasi (Rp): 40.000 | Lama proses (hari): 3 Layanan: Surat rekomendasi | Biaya administrasi (Rp): 15.000 | Lama proses (hari): 4 [1]\n\n3. Pengembalian biaya Biaya dapat dikembalikan jika layanan belum diproses. Pemohon melampirkan nomor permohonan dan bukti pembayaran. Pengembalian diselesaikan dalam 7 hari kerja setelah permohonan disetujui. 4. Kontak layanan Layanan administrasi buka Senin sampai Jumat, pukul 08.00-16.00. Pertanyaan disampaikan melalui loket administrasi. Dokumen ini tidak mencantumkan nomor telepon atau alamat email. 5. Catatan penggunaan Semua nama layanan, biaya, waktu, dan persyaratan pada dokumen ini dibuat khusus untuk demonstrasi dan pengujian aplikasi DokumenTanya. [2]\n\nPanduan Administrasi Akademik DOKUMEN DEMO SINTETIS - bukan kebijakan kampus nyata. 1. Pengajuan cuti akademik Mahasiswa mengajukan cuti melalui formulir CA-01. Persyaratan pengajuan cuti adalah surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Pengajuan diterima paling lambat 14 hari sebelum semester dimulai. Proses verifikasi pengajuan cuti membutuhkan 5 hari kerja setelah dokumen lengkap diterima. Cuti dapat diberikan maksimal dua semester berturut-turut. Panduan ini tidak menetapkan batas semester minimum untuk mengajukan cuti. 2. Biaya layanan administrasi [3]",
+      "status": "answered",
+      "source_pages": [
+        1,
+        2,
+        1
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Apa nomor telepon layanan?",
+      "unanswerable": true,
+      "category": "missing_fact",
+      "passed": false,
+      "seconds": 0.102,
+      "answer": "3. Pengembalian biaya Biaya dapat dikembalikan jika layanan belum diproses. Pemohon melampirkan nomor permohonan dan bukti pembayaran. Pengembalian diselesaikan dalam 7 hari kerja setelah permohonan disetujui. 4. Kontak layanan Layanan administrasi buka Senin sampai Jumat, pukul 08.00-16.00. Pertanyaan disampaikan melalui loket administrasi. Dokumen ini tidak mencantumkan nomor telepon atau alamat email. 5. Catatan penggunaan Semua nama layanan, biaya, waktu, dan persyaratan pada dokumen ini dibuat khusus untuk demonstrasi dan pengujian aplikasi DokumenTanya. [1]\n\nLayanan: Surat aktif kuliah | Biaya administrasi (Rp): 25.000 | Lama proses (hari): 2 Layanan: Legalisasi dokumen | Biaya administrasi (Rp): 40.000 | Lama proses (hari): 3 Layanan: Surat rekomendasi | Biaya administrasi (Rp): 15.000 | Lama proses (hari): 4 [2]\n\nPanduan Administrasi Akademik DOKUMEN DEMO SINTETIS - bukan kebijakan kampus nyata. 1. Pengajuan cuti akademik Mahasiswa mengajukan cuti melalui formulir CA-01. Persyaratan pengajuan cuti adalah surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Pengajuan diterima paling lambat 14 hari sebelum semester dimulai. Proses verifikasi pengajuan cuti membutuhkan 5 hari kerja setelah dokumen lengkap diterima. Cuti dapat diberikan maksimal dua semester berturut-turut. Panduan ini tidak menetapkan batas semester minimum untuk mengajukan cuti. 2. Biaya layanan administrasi [3]",
+      "status": "answered",
+      "source_pages": [
+        2,
+        1,
+        1
+      ],
+      "usage": {}
+    },
+    {
+      "question": "Siapakah astronaut pemenang galaksi?",
+      "unanswerable": true,
+      "category": "unrelated",
+      "passed": true,
+      "seconds": 0.098,
+      "answer": "Bukti dalam dokumen belum cukup untuk menjawab pertanyaan ini. Coba sebutkan istilah atau bagian yang lebih spesifik.",
+      "status": "insufficient_evidence",
+      "source_pages": [],
+      "usage": {}
+    }
+  ],
+  "note": "Small synthetic smoke benchmark. Answer substring checks are not semantic correctness; inspect evidence manually."
+}

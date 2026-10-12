@@ -1,0 +1,12 @@
+.venv/
+.env
+data/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+.DS_Store
+evals/results/*.json
+!evals/results/.gitkeep

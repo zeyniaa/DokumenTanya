@@ -1,0 +1,10 @@
+[
+  {"question":"Apa persyaratan pengajuan cuti?","answer_contains":"CA-01","pages":[1],"category":"text"},
+  {"question":"Berapa lama verifikasi cuti?","answer_contains":"5 hari","pages":[1],"category":"text"},
+  {"question":"Kapan batas pengajuan cuti?","answer_contains":"14 hari","pages":[1],"category":"text"},
+  {"question":"Berapa lama pengembalian biaya?","answer_contains":"7 hari","pages":[2],"category":"text"},
+  {"question":"Berapa total biaya administrasi?","answer_contains":"80.000","pages":[1],"category":"calculation"},
+  {"question":"Berapa biaya legalisasi dokumen?","answer_contains":"40.000","pages":[1],"category":"table"},
+  {"question":"Apa nomor telepon layanan?","unanswerable":true,"category":"missing_fact"},
+  {"question":"Siapakah astronaut pemenang galaksi?","unanswerable":true,"category":"unrelated"}
+]
