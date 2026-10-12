@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/License-MIT-2563EB?style=for-the-badge" alt="MIT license" />
   </p>
 
-[![Tests](https://github.com/zeyniaa/dokumentanya/actions/workflows/ci.yml/badge.svg)](https://github.com/zeyniaa/dokumentanya/actions/workflows/ci.yml)
+[![Tests](https://github.com/zeyniaa/DokumenTanya/actions/workflows/ci.yml/badge.svg)](https://github.com/zeyniaa/DokumenTanya/actions/workflows/ci.yml)
 
 [Gambaran proyek](#gambaran-proyek) · [Arsitektur](#arsitektur-sistem) · [Alur kerja](#alur-kerja) · [Mulai cepat](#mulai-cepat) · [Aktifkan AI](#aktifkan-ai) · [Evaluasi](#evaluasi)
 
@@ -222,8 +222,8 @@ Operasi tersedia: **sum, average, min, max, count**. Format angka Indonesia dipe
 Prasyarat: [Python 3.11–3.13](https://www.python.org/downloads/), [Git](https://git-scm.com/), dan [uv](https://docs.astral.sh/uv/getting-started/installation/). Perintah dijalankan dari root repository. `uv.lock` menyimpan versi dependency yang diselesaikan.
 
 ```bash
-git clone https://github.com/zeyniaa/dokumentanya.git
-cd dokumentanya
+git clone https://github.com/zeyniaa/DokumenTanya.git
+cd DokumenTanya
 uv sync --frozen --extra dev
 ```
 
@@ -424,7 +424,7 @@ Catatan lengkap: [VERIFICATION.md](docs/VERIFICATION.md). Hasil pilot adalah smo
 ## 📂 Struktur Repository
 
 ```text
-dokumentanya/
+DokumenTanya/
 ├── backend/app/
 │   ├── main.py              # FastAPI, endpoint, session scope
 │   ├── config.py            # Environment dan validasi konfigurasi
