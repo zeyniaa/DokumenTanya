@@ -1,55 +1,221 @@
 <div align="center">
-
-# DokumenTanya
-
-**Baca dokumen. Ajukan pertanyaan. Periksa buktinya.**
-
-Document AI workspace untuk PDF berbahasa Indonesia: OCR, tabel, pencarian hybrid, dan jawaban dengan sumber halaman.
+  <h1>📄 DokumenTanya</h1>
+  <h3>Document Intelligence &amp; Verifiable RAG Workspace</h3>
+  <p><strong>Baca dokumen. Ajukan pertanyaan. Periksa buktinya.</strong></p>
+  <p>OCR, ekstraksi tabel, dan percakapan berbasis dokumen dalam workspace HTML yang dapat dijalankan sendiri.</p>
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11 sampai 3.13" />
+    <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI backend" />
+    <img src="https://img.shields.io/badge/HTML%20CSS%20JS-Vanilla%20UI-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML CSS JavaScript" />
+    <img src="https://img.shields.io/badge/Docling-Document%20AI-226B55?style=for-the-badge" alt="Docling document parsing" />
+    <img src="https://img.shields.io/badge/Qdrant-Vector%20Search-DC244C?style=for-the-badge" alt="Qdrant optional vector search" />
+    <img src="https://img.shields.io/badge/License-MIT-2563EB?style=for-the-badge" alt="MIT license" />
+  </p>
 
 [![Tests](https://github.com/zeyniaa/dokumentanya/actions/workflows/ci.yml/badge.svg)](https://github.com/zeyniaa/dokumentanya/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/Python-3.11–3.13-3776AB?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi&logoColor=white)
-![Frontend](https://img.shields.io/badge/UI-HTML%20%2B%20CSS%20%2B%20JS-226B55)
-![License](https://img.shields.io/badge/License-MIT-blue)
 
-[Mulai cepat](#mulai-cepat) · [Aktifkan AI](#aktifkan-ai) · [Docker](#docker) · [Evaluasi](#evaluasi) · [Arsitektur](docs/ARCHITECTURE.md)
+[Gambaran proyek](#gambaran-proyek) · [Arsitektur](#arsitektur-sistem) · [Alur kerja](#alur-kerja) · [Mulai cepat](#mulai-cepat) · [Aktifkan AI](#aktifkan-ai) · [Evaluasi](#evaluasi)
 
 </div>
 
-![Workspace DokumenTanya](docs/images/workspace.jpg)
+---
 
-> Screenshot menunjukkan aplikasi lokal dengan dokumen sintetis dan mode kutipan. Mode ini benar-benar mengekstrak PDF dan mencari bukti, tetapi tidak memanggil LLM.
+<a id="showcase"></a>
 
-## Mengapa proyek ini?
+## 🖥️ Workspace Showcase
 
-Informasi pada SOP dan panduan administrasi sering tersebar dalam paragraf, scan, dan tabel. DokumenTanya menghubungkan pertanyaan pengguna dengan bukti yang dapat diperiksa pada dokumen asli. Pengguna dapat memeriksa OCR, memperbaiki teks yang salah, dan melihat versi sumber yang dipakai oleh jawaban sebelumnya.
+![DokumenTanya — preview PDF, perhitungan, dan sumber halaman](docs/images/workspace.jpg)
 
-Proyek ini memperlihatkan alur AI engineering dari ingestion sampai evaluasi: parsing, provenance, versioning, retrieval, generation, antarmuka, dan operasi layanan. Dataset demo dibuat khusus untuk proyek ini dan tidak berisi data pribadi.
+**Dokumen di kiri, bukti di tengah, percakapan di kanan.** Tombol sumber membuka halaman asli dan menyorot area hasil ekstraksi. Pada ponsel, workspace berubah menjadi tab Dokumen, Preview, dan Chat.
 
-## Fitur
+<details>
+<summary>Lihat tampilan ponsel</summary>
+<br />
+<img src="docs/images/mobile.jpg" width="300" alt="Tampilan chat DokumenTanya pada viewport ponsel" />
+</details>
 
-- **Workspace HTML/CSS/JavaScript** dengan panel dokumen, preview, dan chat; responsif untuk ponsel.
-- **PDF digital dan scan:** parser ringan atau Docling; RapidOCR untuk scan, opsi Tesseract pada Docling.
-- **Preview dokumen, teks, dan tabel**, navigasi halaman, zoom, serta ekspor JSON/Markdown.
-- **Pencarian BM25 atau E5 + Qdrant**, penggabungan RRF, dan reranker Qwen opsional.
-- **Chat dengan sumber:** kutipan, halaman, versi, dan highlight area pada dokumen asli.
-- **Percakapan 1–5 dokumen**, riwayat tersimpan, dan konteks pertanyaan lanjutan.
-- **Koreksi teks OCR berversi:** indeks baru diaktifkan setelah siap; sumber jawaban lama tetap tersedia.
-- **Perhitungan tabel dengan Decimal:** jumlah, rata-rata, minimum, maksimum, dan jumlah sel.
-- **Ringkasan seluruh dokumen secara bertahap** pada provider LLM; asal sumber dipertahankan.
-- **Worker pemrosesan, status, retry eksplisit, dan deduplikasi upload.**
-- **Isolasi sesi browser**, validasi file, proteksi origin, dan penghapusan dokumen beserta indeks/percakapan terkait.
-- **Tests, CI, PDF sintetis, dan runner evaluasi** yang menyimpan konfigurasi serta hasil aktual.
+> Screenshot menggunakan PDF sintetis proyek. Label **Mode kutipan** berarti jawaban berasal dari pencarian bukti tanpa LLM; contoh total tabel dihitung oleh fungsi Python. Gemini dan Ollama dapat diaktifkan melalui konfigurasi backend.
 
-## Mode yang tersedia
+---
+
+<a id="gambaran-proyek"></a>
+
+## 📝 Gambaran Proyek
+
+**DokumenTanya** membantu pengguna menemukan informasi dalam SOP, panduan administrasi, laporan, dan PDF hasil scan. Sistem mengubah dokumen menjadi teks serta tabel yang dapat dicari, lalu menghubungkan jawaban dengan kutipan, nomor halaman, dan versi sumber.
+
+Proyek ini dibangun sebagai portofolio **AI Engineer** dengan perhatian pada alur data dan evaluasi: ingestion, OCR, chunking, retrieval, generation, provenance, antarmuka, serta pemrosesan background.
+
+Empat kemampuan utamanya:
+
+1. **📥 Document ingestion:** menerima PDF, membaca teks/layout/tabel, menjalankan OCR sesuai konfigurasi, dan menampilkan status pemrosesan.
+2. **💬 Document question answering:** mencari bukti dalam 1–5 dokumen terpilih, menggunakan riwayat pertanyaan singkat, dan menyajikan jawaban beserta sumber.
+3. **✏️ Versioned OCR correction:** memperbaiki teks ekstraksi, membuat indeks versi baru, dan mempertahankan sumber jawaban historis.
+4. **🧮 Deterministic table calculations:** menghitung angka dengan Decimal dan operasi yang dibatasi, sehingga perhitungan tidak bergantung pada tebakan LLM.
+
+**Cakupan awal:** PDF digital dan scan dengan teks cetak Indonesia/Inggris, tabel sederhana, maksimal **20 MB dan 50 halaman per dokumen**. Chat lintas bahasa dirancang untuk konfigurasi embedding multilingual + LLM; mode BM25/kutipan lebih bergantung pada kesamaan istilah.
+
+---
+
+<a id="arsitektur-sistem"></a>
+
+## 🌐 Arsitektur Sistem
+
+```mermaid
+flowchart TD
+    User["Pengguna / browser"] --> UI["HTML5 · CSS · JavaScript<br/>Upload, preview, teks, tabel, chat"]
+    UI -->|"FormData / JSON / polling"| API["FastAPI + Pydantic<br/>Validasi input dan scope sesi"]
+
+    API --> DB[("SQLite<br/>Dokumen, versi, jobs, percakapan")]
+    API --> Queue["Antrean ingestion<br/>Executor lokal atau Redis + RQ"]
+    Queue --> Worker["Document worker"]
+    Worker --> Parse["pdfplumber atau Docling<br/>Native text · OCR · struktur tabel"]
+    Parse --> Files["File asli + gambar halaman<br/>Item teks, tabel, bounding box"]
+    Files --> Chunk["Chunking dengan metadata sumber"]
+    Chunk --> DB
+    Chunk -->|"E5 opsional"| Vector[("Qdrant<br/>Embedding dan filter versi")]
+
+    API --> Search["Scoped retrieval<br/>BM25 / dense / hybrid RRF"]
+    DB --> Search
+    Vector --> Search
+    Search --> Rank["Reranker Qwen opsional"]
+    Rank --> Answer["Mode kutipan / Gemini / Ollama"]
+    Answer --> Validate["Validasi schema dan source IDs"]
+    Validate --> Evidence["Jawaban + kutipan<br/>Dokumen, versi, halaman, highlight"]
+    Evidence --> UI
+
+    API --> Calc["Fungsi kalkulasi tabel<br/>Decimal + operasi allowlist"]
+    Calc --> UI
+
+    classDef client fill:#edf5e9,stroke:#226b55,color:#173b2e;
+    classDef core fill:#e8f0fb,stroke:#406eaa,color:#173652;
+    classDef storage fill:#fff5df,stroke:#b58828,color:#634512;
+    classDef ai fill:#f1eafd,stroke:#8161b0,color:#493765;
+    class UI,User,Evidence client;
+    class API,Queue,Worker,Validate,Calc core;
+    class DB,Files,Vector storage;
+    class Parse,Chunk,Search,Rank,Answer ai;
+```
+
+Frontend dan API disajikan pada origin yang sama. Model serta API key berada di backend. Pencarian dibatasi pada dokumen dan versi yang diizinkan sebelum pemeringkatan.
+
+Validasi source ID memastikan sumber berasal dari konteks yang diberikan; dukungan isi klaim tetap perlu dievaluasi. Penjelasan lebih lengkap tersedia di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+---
+
+<a id="alur-kerja"></a>
+
+## 🔄 Alur Kerja Utama
+
+### A. Upload, Parsing, dan OCR
+
+```mermaid
+flowchart LR
+    A["Upload PDF"] --> B["Validasi ukuran,<br/>signature, dan halaman"]
+    B --> C{"Duplikat dalam sesi?"}
+    C -->|"Ya"| D["Gunakan dokumen yang ada"]
+    C -->|"Tidak"| E["Buat job pemrosesan"]
+    E --> F["Render halaman<br/>dan ekstrak teks/tabel"]
+    F --> G["OCR sesuai parser<br/>dan konfigurasi"]
+    G --> H["Buat chunks<br/>dan indeks pencarian"]
+    H --> I["Simpan versi<br/>dan aktifkan setelah siap"]
+```
+
+Halaman asli, posisi sumber, dan hasil ekstraksi disimpan untuk preview. Error format, scan tanpa OCR, atau kegagalan model ditampilkan sebagai pekerjaan gagal yang dapat diperiksa dan dicoba lagi.
+
+### B. Pertanyaan dan Jawaban Bersumber
+
+```mermaid
+flowchart TD
+    A["Pertanyaan pengguna"] --> B["Tentukan dokumen<br/>dan versi aktif"]
+    B --> C["Tambahkan konteks<br/>pertanyaan sebelumnya bila perlu"]
+    C --> D["Cari kandidat semantik<br/>dan/atau kata kunci"]
+    D --> E["Gabungkan ranking<br/>dan rerank bila aktif"]
+    E --> F["Berikan bukti ke<br/>provider penjawab"]
+    F --> G["Periksa struktur<br/>dan referensi sumber"]
+    G --> H["Jawaban + citations"]
+    H --> I["Klik sumber untuk<br/>membuka halaman bukti"]
+```
+
+Setiap pesan memiliki request ID untuk mencegah generation ganda pada retry yang sudah selesai. Ringkasan seluruh dokumen menggunakan map/reduce pada provider LLM; mode kutipan menampilkan bagian dokumen dengan batas yang dijelaskan di UI.
+
+### C. Koreksi Teks dan Versi Indeks
+
+```mermaid
+flowchart LR
+    A["Periksa teks OCR"] --> B["Koreksi item teks"]
+    B --> C["Validasi versi asal"]
+    C --> D["Buat versi dan<br/>indeks baru"]
+    D --> E["Aktifkan setelah siap"]
+    E --> F["Pertanyaan baru<br/>menggunakan versi baru"]
+    C -.-> G["Citation historis tetap<br/>membuka versi lama"]
+```
+
+Koreksi memperbarui hasil ekstraksi, bukan file PDF asli. Jika parser atau model embedding diganti, tombol **Proses ulang dokumen** membangun versi baru dengan konfigurasi server saat ini.
+
+### D. Perhitungan Tabel
+
+Pertanyaan hitungan otomatis dijalankan hanya jika satu kolom tabel dapat ditentukan secara unik. Jika ambigu, pengguna memilih tabel, kolom, dan operasi melalui tab **Tabel**.
+
+```mermaid
+flowchart LR
+    A["Tabel + kolom + operasi"] --> B["Validasi angka<br/>dan satuan"]
+    B --> C["Hitung dengan Decimal"]
+    C --> D["Hasil + jumlah sel<br/>+ halaman sumber"]
+```
+
+Operasi tersedia: **sum, average, min, max, count**. Format angka Indonesia diperiksa secara eksplisit; nilai ambigu atau satuan bercampur ditolak. Sistem tidak mengeksekusi Python atau SQL bebas yang dihasilkan model.
+
+---
+
+<a id="fitur-dan-mode"></a>
+
+## 🧩 Fitur dan Mode Operasi
+
+| Kemampuan | Implementasi | Keterangan |
+| :--- | :--- | :--- |
+| Workspace dokumen | HTML/CSS/ES modules | Upload, daftar dokumen, preview, zoom, navigasi halaman |
+| Ekstraksi terstruktur | pdfplumber / Docling | Teks, tabel, halaman, dan posisi sumber |
+| OCR | RapidOCR; Tesseract pada Docling | Tesseract memerlukan traineddata bahasa yang sesuai |
+| Retrieval | BM25, E5/Qdrant, RRF | Dense/hybrid neural membutuhkan konfigurasi E5 dan Qdrant |
+| Jawaban bersumber | Extractive, Gemini, Ollama | Provider aktif terlihat di UI |
+| Chat beberapa dokumen | Scope 1–5 dokumen | Riwayat terikat pada sesi browser |
+| Koreksi dan reprocess | Versi ekstraksi immutable | Versi lama tetap tersedia untuk citations |
+| Perhitungan | Decimal + allowlist | Pemilihan tabel/kolom melalui UI jika ambigu |
+| Ekspor | JSON / Markdown | Hasil ekstraksi dapat diunduh |
+| Pemrosesan background | Executor lokal / Redis + RQ | Polling status, deduplikasi, retry eksplisit |
+| Pengujian | pytest, smoke checks, CI | Hasil aktual dan batas verifikasi terdokumentasi |
 
 | Mode | Parser | Retrieval | Jawaban | Kebutuhan |
-|---|---|---|---|---|
-| Lokal dasar | pdfplumber | BM25 | Kutipan relevan | Python; tanpa API key |
-| Lokal + OCR | pdfplumber + RapidOCR | BM25 | Kutipan relevan | Extra `ocr` |
-| Document AI | Docling + OCR | E5/Qdrant + BM25 | Gemini atau Ollama | Extra `ai`/`ocr`, Qdrant, model/key |
+| :--- | :--- | :--- | :--- | :--- |
+| **Lokal dasar** | pdfplumber | BM25 | Kutipan relevan | Python, tanpa API key |
+| **Lokal + OCR** | pdfplumber + RapidOCR | BM25 | Kutipan relevan | Extra `ocr` |
+| **Document AI** | Docling + OCR | E5/Qdrant + BM25 | Gemini atau Ollama | Extra `ai`/`ocr`, Qdrant, model/key |
 
-**Mode dasar adalah baseline extractive, bukan jawaban generatif.** Label provider terlihat di UI. Tidak ada penggantian diam-diam ke jawaban palsu ketika model atau API gagal.
+**Mode dasar adalah baseline extractive.** Jawaban generatif membutuhkan Gemini API key atau server Ollama. Provider yang gagal menghasilkan error; sistem tidak mengarang respons pengganti.
+
+---
+
+<a id="technology-stack"></a>
+
+## 💻 Technology Stack
+
+| Layer | Teknologi | Peran |
+| :--- | :--- | :--- |
+| **Frontend** | Semantic HTML5, CSS, vanilla JavaScript | Workspace responsif, state UI, fetch, dan polling; tanpa build frontend |
+| **API** | Python 3.11–3.13, FastAPI, Pydantic | Validasi request, endpoint dokumen/chat, file response |
+| **Parsing** | pdfplumber, pypdfium2, Docling | Ekstraksi native, rendering halaman, layout dan tabel |
+| **OCR** | RapidOCR + ONNX Runtime | Pengenalan teks pada scan |
+| **Embedding** | Sentence Transformers, multilingual E5 Small | Embedding 384 dimensi, prefix query/passage, batas input 512 token |
+| **Retrieval** | Qdrant, BM25, Reciprocal Rank Fusion | Pencarian semantik/kata kunci dengan filter scope |
+| **Reranking** | Qwen3-Reranker-0.6B, opsional | Mengurutkan ulang kandidat; perlu profiling tambahan |
+| **Generation** | Google GenAI SDK / Ollama HTTP API | Structured claims dan source IDs |
+| **Metadata** | SQLite dengan WAL | Dokumen, versi, jobs, percakapan, dan jawaban |
+| **Worker** | ThreadPoolExecutor / Redis + RQ | Antrean lokal atau worker proses terpisah |
+| **Calculations** | Python Decimal | Perhitungan tabel dan validasi angka |
+| **Reproducibility** | uv.lock, Docker Compose, GitHub Actions | Dependency terkunci dan pemeriksaan otomatis |
+
+---
 
 ## Mulai cepat
 
@@ -201,22 +367,7 @@ Kemudian jalankan ulang `docker compose up --build`. Worker RQ berjalan di conta
 
 Mode lokal JOB_BACKEND=local hanya untuk pengembangan dengan **satu proses Uvicorn**. Hindari reload/multi-worker saat ingestion sedang berjalan. Pekerjaan yang terhenti ditandai gagal dan dapat dicoba lagi. Gunakan RQ untuk layanan yang memerlukan worker terpisah.
 
-## Arsitektur
-
-```mermaid
-flowchart TD
-    Upload[HTML upload / FormData] --> API[FastAPI]
-    API --> Queue[Executor lokal atau Redis/RQ]
-    Queue --> Parse[PDF parser / Docling / OCR]
-    Parse --> Version[Items, tabel, halaman, versi immutable]
-    Version --> Search[BM25 + E5/Qdrant + RRF]
-    Question[Pertanyaan pengguna] --> Search
-    Search --> Model[Gemini / Ollama / kutipan]
-    Model --> Validate[Validasi schema dan source IDs]
-    Validate --> Answer[Jawaban + kutipan + highlight]
-```
-
-API key hanya berada di backend. Koreksi menghasilkan versi baru, sedangkan citation historis tetap merujuk ke versi lama. Perhitungan tabel menggunakan fungsi yang dibatasi, bukan kode yang dihasilkan model. Detail: [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+---
 
 ## API utama
 
@@ -236,6 +387,8 @@ API key hanya berada di backend. Koreksi menghasilkan versi baru, sedangkan cita
 
 Dokumentasi schema lengkap tersedia melalui Swagger ketika server berjalan.
 
+---
+
 ## Evaluasi
 
 ```bash
@@ -250,17 +403,82 @@ Tests mencakup upload, citation, isolasi sesi, versi koreksi, hitungan, idempote
 
 Lihat [catatan verifikasi](docs/VERIFICATION.md) untuk membedakan pemeriksaan yang dijalankan dari integrasi yang belum diuji langsung. Tidak ada klaim akurasi produksi dari dataset demo.
 
-## Struktur repository
+### Hasil verifikasi yang tercatat
+
+| Pemeriksaan | Hasil | Cakupan |
+| :--- | :--- | :--- |
+| **Automated tests lokal** | **19 passed** | Workflow, isolasi sesi, citations, koreksi/reprocess, hitungan, idempotency, provider contract |
+| **Ruff & JavaScript syntax** | **Passed** | Kode Python dan semua ES modules frontend |
+| **Browser desktop & mobile** | **Diperiksa** | Upload, chat, perhitungan, klik sumber/highlight, viewport 390×844 |
+| **RapidOCR** | **Passed** | PDF scan sintetis dengan model OCR asli |
+| **Docling** | **Passed** | Teks dan satu tabel pada PDF sintetis |
+| **E5 + Qdrant in-memory** | **Passed** | Model asli, 384 dimensi, filter owner/versi |
+| **Pilot benchmark** | **7/8 checks passed** | Delapan pertanyaan sintetis; pemeriksaan substring |
+| **Gemini / Ollama** | **Kontrak/schema diperiksa** | Live generation belum diuji karena key/server belum tersedia |
+| **Qwen reranker / Docker stack** | **Belum diuji langsung** | Implementasi/configuration tersedia |
+
+Catatan lengkap: [VERIFICATION.md](docs/VERIFICATION.md). Hasil pilot adalah smoke benchmark, bukan klaim akurasi pada dokumen nyata. Kegagalan pertanyaan tentang nomor telepon yang tidak tercantum tetap dicatat dalam [hasil pilot](docs/pilot-results.json).
+
+---
+
+## 📂 Struktur Repository
 
 ```text
-backend/app/        API, metadata, jobs, worker, dan services AI
-frontend/          HTML, CSS, dan JavaScript ES modules
-examples/          PDF digital dan scan sintetis
-scripts/           Generator contoh dan smoke checks model
-tests/             Pengujian workflow dan kontrak layanan
-evals/             Dataset pilot, runner, dan hasil lokal
-docs/              Arsitektur, evaluasi, dan screenshot
+dokumentanya/
+├── backend/app/
+│   ├── main.py              # FastAPI, endpoint, session scope
+│   ├── config.py            # Environment dan validasi konfigurasi
+│   ├── store.py             # SQLite metadata dan versi
+│   ├── jobs.py              # Ingestion dan aktivasi indeks
+│   ├── worker.py            # Worker Redis/RQ
+│   └── services/            # Parser, retrieval, generation, calculations
+├── frontend/
+│   ├── index.html           # Workspace satu halaman
+│   └── assets/
+│       ├── css/             # Design dan layout responsif
+│       └── js/              # Upload, viewer, chat, API, dan state
+├── examples/                # PDF digital dan scan sintetis
+├── scripts/                 # Generator contoh dan smoke checks
+├── tests/                   # Workflow, provider contract, dan metrics
+├── evals/                   # Dataset pilot dan runner benchmark
+├── docs/                    # Arsitektur, evaluasi, screenshot, verifikasi
+├── .github/workflows/ci.yml  # Tes dan pemeriksaan syntax
+├── .env.example             # Contoh konfigurasi tanpa secret
+├── pyproject.toml
+├── uv.lock
+├── Dockerfile
+└── compose.yaml
 ```
+
+Direktori runtime `data/` dibuat saat aplikasi dijalankan dan diabaikan Git. Isinya mencakup file upload, gambar halaman, database, session key, dan cache model.
+
+---
+
+<a id="faq"></a>
+
+## ❓ Pertanyaan Umum
+
+**Mengapa pemrosesan PDF bisa lama?**
+
+Docling menjalankan analisis layout dan tabel, serta OCR bila aktif. Scan, jumlah halaman, tabel rumit, penggunaan CPU, dan download model pertama memengaruhi durasi. OCR tidak diulang untuk setiap pertanyaan: chat membaca indeks versi yang sudah siap.
+
+**Apakah dokumen Inggris bisa dibaca?**
+
+Parser mendukung ekstraksi teks Inggris. Mode kutipan menggunakan pencarian kata kunci; pertanyaan Indonesia terhadap teks Inggris dapat kehilangan kecocokan. E5 + LLM dirancang untuk pencarian multilingual dan jawaban Indonesia, tetapi kualitas lintas bahasa masih perlu diuji pada dataset yang sesuai.
+
+**Apakah bisa dicoba tanpa API key?**
+
+Bisa. Mode lokal dasar memakai PDF extraction, BM25, dan kutipan. Label UI memperjelas bahwa mode ini belum menyusun jawaban LLM.
+
+**Apa yang perlu dilakukan setelah mengganti model atau parser?**
+
+Restart server, lalu klik **Proses ulang dokumen**. Ini membangun versi baru. Jawaban historis tetap mengacu pada sumber versi sebelumnya.
+
+**Apakah pengguna memiliki akun login?**
+
+Saat ini workspace dipisahkan oleh signed cookie sesi. Ini bukan autentikasi akun. Menghapus cookie membuat workspace lama tidak dapat diakses dari browser tersebut, tetapi tidak menghapus data server.
+
+---
 
 ## Batas dan penggunaan data
 
@@ -282,6 +500,7 @@ Fondasi dan pola yang dipelajari:
 - [Multilingual E5](https://huggingface.co/intfloat/multilingual-e5-small), [Qwen reranker](https://huggingface.co/Qwen/Qwen3-Reranker-0.6B).
 - [Qdrant](https://qdrant.tech/documentation/search/hybrid-queries/): pencarian vektor dan hybrid.
 - [FastAPI](https://fastapi.tiangolo.com/) dan [MDN Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch).
+- [BaliTowerOps](https://github.com/daffaarigoh/BaliTowerOps): referensi struktur presentasi README, diagram arsitektur/alur kerja, dan tabel stack. Implementasi DokumenTanya berfokus pada Document AI.
 - [Gemini structured outputs](https://ai.google.dev/gemini-api/docs/structured-output), [Ollama](https://ollama.com/).
 
 Kode proyek berlisensi [MIT](LICENSE). Dependency, model, dan dataset memiliki lisensi masing-masing.
