@@ -55,6 +55,16 @@ def initialize():
         CREATE INDEX IF NOT EXISTS owner_docs ON documents(owner);
         CREATE INDEX IF NOT EXISTS owner_convs ON conversations(owner);
         """)
+        # Additive migration keeps existing documents and conversations intact.
+        columns = {row[1] for row in db.execute("PRAGMA table_info(jobs)")}
+        for name, declaration in {
+            "progress_percent": "INTEGER NOT NULL DEFAULT 0",
+            "pages_done": "INTEGER NOT NULL DEFAULT 0",
+            "pages_total": "INTEGER NOT NULL DEFAULT 0",
+            "phase": "TEXT NOT NULL DEFAULT 'queued'",
+        }.items():
+            if name not in columns:
+                db.execute(f"ALTER TABLE jobs ADD COLUMN {name} {declaration}")
 
 
 def one(sql, parameters=()):

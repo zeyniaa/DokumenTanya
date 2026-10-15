@@ -42,3 +42,13 @@ uv run --extra dev --extra ai --extra ocr python scripts/smoke_ai.py --mode e5
 ```
 
 The E5 smoke check uses the real model and Qdrant's in-memory implementation, not a running Qdrant HTTP server. These checks download weights on first use and exercise synthetic documents. They do not test a paid LLM provider or the Docker stack.
+
+## Interactive local-model smoke check
+
+With Ollama running and `LLM_PROVIDER=ollama`, run:
+
+```bash
+uv run python -m scripts.smoke_chat --output docs/ollama-smoke.json
+```
+
+This reads only the bundled synthetic PDF. It tests overview, conclusion, conversational simplification, and a question outside document scope. Success checks answer status and citation presence; inspect the recorded wording manually for support and useful simplification. Four questions are not an accuracy benchmark. Timings depend on loading, hardware and concurrent work.

@@ -26,6 +26,7 @@ export function renderViewer() {
   $('export-button').disabled=!content;
   $('reprocess-button').disabled=!content;
   $('version-badge').hidden=!content;
+  $('extraction-warning').hidden=!content||!content.warnings.length;
   if(!content)return;
   $('viewer-title').textContent=content.name;
   $('viewer-subtitle').textContent=`${content.pages.length} halaman · ${content.parser} · v${content.version_number}`;

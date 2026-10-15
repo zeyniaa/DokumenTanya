@@ -50,13 +50,6 @@ export async function uploadFile(file) {
   } catch(error){toast(error.message,true);}
   finally{$('upload-zone').classList.remove('dragging');$('file-input').value='';}
 }
-export async function uploadDemo() {
-  $('demo-button').disabled=true;$('empty-demo').disabled=true;
-  try{const response=await fetch('/api/demo/file');if(!response.ok)throw new Error('Contoh PDF belum tersedia.');
-    await uploadFile(new File([await response.blob()],'Panduan Akademik Demo.pdf',{type:'application/pdf'}));
-  }catch(error){toast(error.message,true);}
-  finally{$('demo-button').disabled=false;$('empty-demo').disabled=false;}
-}
 export function trackJob(documentId,jobId) {
   if(state.jobs.get(documentId)===jobId)return;
   state.jobs.set(documentId,jobId);
@@ -65,6 +58,10 @@ export function trackJob(documentId,jobId) {
     if(state.jobs.get(documentId)!==jobId)return;
     try {
       const job=await api(`/jobs/${jobId}`);emit('dt:job',job);
+      const document=state.documents.find(d=>d.id===documentId);
+      if(['queued','processing'].includes(job.status)&&document&&document.status!=='processing'){
+        document.status='processing';renderDocuments();
+      }
       if(['ready','failed'].includes(job.status)) {
         state.jobs.delete(documentId);await refreshDocuments();
         if(job.status==='ready')emit('dt:ready',documentId);

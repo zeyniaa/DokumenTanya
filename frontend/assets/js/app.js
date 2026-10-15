@@ -1,7 +1,7 @@
 import {api} from './api.js';
 import {state} from './state.js';
 import {$,node,toast,mobile} from './ui.js';
-import {refreshDocuments,renderDocuments,uploadFile,uploadDemo,trackJob} from './documents.js';
+import {refreshDocuments,renderDocuments,uploadFile,trackJob} from './documents.js';
 import {loadDocument,resetViewer,setTab,renderPage} from './viewer.js';
 import {initializeChat,resetChat,sendQuestion} from './chat.js';
 
@@ -12,8 +12,24 @@ async function selectDocument(id){
 }
 function showJob(job,id=job.document_id){
   if(state.selectedDoc!==id)return;
-  const banner=$('job-banner');banner.replaceChildren();banner.hidden=job.status==='ready';banner.classList.toggle('error',job.status==='failed');
-  banner.append(node('span','',job.status==='failed'?(job.error||'Pemrosesan gagal'):job.stage||'Menunggu'));
+  const banner=$('job-banner');banner.hidden=job.status==='ready';banner.classList.toggle('error',job.status==='failed');
+  if(job.status==='ready')return;
+  if(job.status!=='failed'){
+    if(!banner.querySelector('.ocr-progress')){
+      banner.replaceChildren();
+      const card=node('div','ocr-progress');const heading=node('div','ocr-heading');
+      heading.append(node('span','ocr-spinner'),node('strong','ocr-title'),node('span','ocr-percent'));
+      const bar=node('div','ocr-track');bar.setAttribute('role','progressbar');bar.setAttribute('aria-label','Halaman selesai dibaca');bar.setAttribute('aria-valuemin','0');bar.setAttribute('aria-valuemax','100');bar.append(node('div','ocr-fill'));
+      card.append(heading,bar,node('p','ocr-detail'));banner.append(card);
+    }
+    const percent=Number(job.progress_percent||0),done=Number(job.pages_done||0),total=Number(job.pages_total||0);
+    banner.querySelector('.ocr-title').textContent=job.phase==='index'?'Bacaan selesai · menyiapkan chat':job.phase==='render'?'Menyiapkan halaman':job.status==='queued'?'Menunggu giliran':'Membaca teks, tabel & OCR';
+    banner.querySelector('.ocr-percent').textContent=`${percent}%`;
+    const bar=banner.querySelector('.ocr-track');bar.setAttribute('aria-valuenow',String(percent));bar.querySelector('.ocr-fill').style.width=`${percent}%`;
+    banner.querySelector('.ocr-detail').textContent=job.phase==='index'?`${done}/${total} halaman selesai. Membuat indeks pencarian…`:job.phase==='render'?job.stage:total?`${done}/${total} halaman selesai dibaca. ${done===0?'Model sedang disiapkan; halaman pertama bisa lebih lama.':''}`:'Dokumen akan diproses setelah antrean sebelumnya selesai.';
+    return;
+  }
+  banner.replaceChildren(node('span','',job.error||'Pemrosesan gagal'));
   if(job.status==='failed'){const retry=node('button','','Coba lagi');retry.addEventListener('click',async()=>{try{const next=await api(`/documents/${id}/retry`,{method:'POST'});trackJob(id,next.job_id);}catch(error){toast(error.message,true);}});banner.append(retry);}
 }
 document.addEventListener('dt:select',event=>selectDocument(event.detail).catch(error=>toast(error.message,true)));
@@ -29,7 +45,7 @@ $('upload-zone').addEventListener('keydown',event=>{if(['Enter',' '].includes(ev
 $('upload-zone').addEventListener('dragover',event=>{event.preventDefault();$('upload-zone').classList.add('dragging');});
 $('upload-zone').addEventListener('dragleave',()=>$('upload-zone').classList.remove('dragging'));
 $('upload-zone').addEventListener('drop',event=>{event.preventDefault();uploadFile(event.dataTransfer.files[0]);});
-$('demo-button').addEventListener('click',uploadDemo);$('empty-demo').addEventListener('click',uploadDemo);
+$('empty-upload').addEventListener('click',()=>$('file-input').click());
 document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>setTab(button.dataset.tab)));
 document.querySelectorAll('[data-mobile]').forEach(button=>button.addEventListener('click',()=>mobile(button.dataset.mobile)));
 $('prev-page').addEventListener('click',()=>{if(state.page>1){state.page--;renderPage();}});
@@ -48,9 +64,8 @@ $('help-button').addEventListener('click',()=>$('help-dialog').showModal());$('c
 try{
   state.config=await api('/config');
   const provider=state.config.provider;
-  $('mode-badge').textContent=provider==='extractive'?'Mode kutipan':provider==='gemini'?'Gemini aktif':'Model lokal';
   $('help-mode').textContent=provider==='extractive'?'Mode saat ini menampilkan kutipan relevan dari dokumen. Aktifkan Gemini atau Ollama pada konfigurasi backend untuk jawaban LLM.':'Model menyusun jawaban dari bukti yang ditemukan. Periksa sumber untuk memastikan ketepatannya.';
   $('upload-limit').textContent=`PDF · Maks. ${state.config.max_upload_mb} MB / ${state.config.max_pages} hal.`;
   await refreshDocuments();
   if(state.documents.length)await selectDocument(state.documents[0].id);
-}catch(error){$('mode-badge').textContent='Koneksi terputus';toast(error.message,true);}
+}catch(error){toast(error.message,true);}

@@ -10,7 +10,7 @@ export function composer() {
   $('question-input').placeholder=ready?'Tanyakan sesuatu tentang dokumen…':'Pilih dokumen yang sudah siap…';
   $('composer-hint').textContent=state.chatPending?'Mencari bukti dan menyusun jawaban…':'Jawaban disertai sumber';
 }
-export function resetChat(){state.chatEpoch++;state.conversation=null;state.chatPending=false;$('messages').replaceChildren(welcome);composer();}
+export function resetChat(){state.chatEpoch++;state.conversation=null;state.chatPending=false;$('chat-scope').textContent='Jawaban berdasarkan sumber';$('messages').replaceChildren(welcome);composer();}
 export async function initializeChat(ids,forceNew=false) {
   resetChat();state.scope=ids;const epoch=state.chatEpoch;
   if(!ids.length)return;

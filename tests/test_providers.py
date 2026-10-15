@@ -13,16 +13,27 @@ def test_ollama_structured_answer_and_invalid_citation(client, monkeypatch):
     calls = []
     def response(url, **kwargs):
         calls.append(kwargs)
-        return httpx.Response(200, request=httpx.Request("POST", url), json={"message": {"content": json.dumps({"answer_status": "answered", "claims": [{"text": "Lima hari.", "source_ids": ["real-source"]}]})}})
+        return httpx.Response(200, request=httpx.Request("POST", url), json={"message": {"content": json.dumps({"answer_status": "answered", "claims": [{"text": "Lima hari.", "source_ids": ["S1"]}]})}})
     monkeypatch.setattr(httpx, "post", response)
     answer, _ = generation.generate("Berapa hari?", candidates)
     assert answer.claims[0].source_ids == ["real-source"]
     assert "untrusted document data" in calls[0]["json"]["messages"][0]["content"]
+    assert calls[0]["json"]["format"]["$defs"]["Claim"]["properties"]["source_ids"]["items"]["enum"] == ["S1"]
     def bad_response(url, **kwargs):
         return httpx.Response(200, request=httpx.Request("POST", url), json={"message": {"content": json.dumps({"answer_status": "answered", "claims": [{"text": "Invented", "source_ids": ["invented-source"]}]})}})
     monkeypatch.setattr(httpx, "post", bad_response)
     with pytest.raises(ValueError, match="referensi sumber"):
         generation.generate("Berapa hari?", candidates)
+
+
+def test_model_cannot_claim_insufficient_with_citations(client, monkeypatch):
+    from backend.app.config import settings
+    settings().llm_provider = "ollama"
+    def response(url, **kwargs):
+        return httpx.Response(200, request=httpx.Request("POST", url), json={"message": {"content": json.dumps({"answer_status": "insufficient_evidence", "claims": [{"text": "Ada bukti", "source_ids": ["S1"]}]})}})
+    monkeypatch.setattr(httpx, "post", response)
+    with pytest.raises(ValueError, match="tidak konsisten"):
+        generation.generate("Topik?", [{"id": "id", "filename": "demo.pdf", "page_no": 1, "text": "Bukti."}])
 
 
 def test_gemini_sdk_schema(client):

@@ -24,17 +24,13 @@
 
 ## 🖥️ Workspace Showcase
 
-![DokumenTanya — preview PDF, perhitungan, dan sumber halaman](docs/images/workspace.jpg)
+![DokumenTanya — preview PDF dan progres OCR per halaman](docs/images/ocr-progress.jpg)
 
 **Dokumen di kiri, bukti di tengah, percakapan di kanan.** Tombol sumber membuka halaman asli dan menyorot area hasil ekstraksi. Pada ponsel, workspace berubah menjadi tab Dokumen, Preview, dan Chat.
 
-<details>
-<summary>Lihat tampilan ponsel</summary>
-<br />
-<img src="docs/images/mobile.jpg" width="300" alt="Tampilan chat DokumenTanya pada viewport ponsel" />
-</details>
 
-> Screenshot menggunakan PDF sintetis proyek. Label **Mode kutipan** berarti jawaban berasal dari pencarian bukti tanpa LLM; contoh total tabel dihitung oleh fungsi Python. Gemini dan Ollama dapat diaktifkan melalui konfigurasi backend.
+
+> Screenshot menggunakan PDF sintetis proyek. Screenshot menunjukkan **38% ketika 3 dari 8 halaman selesai dibaca**. Hasil uji percakapan **Ollama + Qwen3 4B lokal** tersedia pada [rekaman pengujian](docs/ollama-smoke.json). Badge Mode kutipan dan blok contoh di sidebar telah dihapus. Clone tetap memiliki baseline tanpa LLM; aktifkan Ollama untuk ringkasan dan penjelasan generatif.
 
 ---
 
@@ -48,8 +44,8 @@ Proyek ini dibangun sebagai portofolio **AI Engineer** dengan perhatian pada alu
 
 Empat kemampuan utamanya:
 
-1. **📥 Document ingestion:** menerima PDF, membaca teks/layout/tabel, menjalankan OCR sesuai konfigurasi, dan menampilkan status pemrosesan.
-2. **💬 Document question answering:** mencari bukti dalam 1–5 dokumen terpilih, menggunakan riwayat pertanyaan singkat, dan menyajikan jawaban beserta sumber.
+1. **📥 Document ingestion:** menerima PDF, membaca teks/layout/tabel, menjalankan OCR sesuai konfigurasi, dan menampilkan animasi serta persentase halaman yang selesai dibaca.
+2. **💬 Document question answering:** mencari bukti dalam 1–5 dokumen terpilih, menjelaskan topik dan kesimpulan serta menggunakan konteks percakapan lanjutan, dan menyajikan jawaban beserta sumber.
 3. **✏️ Versioned OCR correction:** memperbaiki teks ekstraksi, membuat indeks versi baru, dan mempertahankan sumber jawaban historis.
 4. **🧮 Deterministic table calculations:** menghitung angka dengan Decimal dan operasi yang dibatasi, sehingga perhitungan tidak bergantung pada tebakan LLM.
 
@@ -123,6 +119,8 @@ flowchart LR
 
 Halaman asli, posisi sumber, dan hasil ekstraksi disimpan untuk preview. Error format, scan tanpa OCR, atau kegagalan model ditampilkan sebagai pekerjaan gagal yang dapat diperiksa dan dicoba lagi.
 
+Progres membaca dihitung dari **halaman selesai / seluruh halaman × 100**, bukan timer. Saat render atau model pertama kali dimuat, angka tetap 0% dan tahap yang sedang berjalan ditampilkan. Setelah pembacaan mencapai 100%, sistem masih membuat indeks; chat diaktifkan setelah status **Siap**. Progres disimpan di SQLite dan dapat dimuat ulang. Pada Docling, konversi memakai `page_range` per halaman dengan nomor dan posisi sumber asli. Tabel yang bersambung antarhalaman belum digabung otomatis.
+
 ### B. Pertanyaan dan Jawaban Bersumber
 
 ```mermaid
@@ -137,7 +135,7 @@ flowchart TD
     H --> I["Klik sumber untuk<br/>membuka halaman bukti"]
 ```
 
-Setiap pesan memiliki request ID untuk mencegah generation ganda pada retry yang sudah selesai. Ringkasan seluruh dokumen menggunakan map/reduce pada provider LLM; mode kutipan menampilkan bagian dokumen dengan batas yang dijelaskan di UI.
+Setiap pesan memiliki request ID untuk mencegah generation ganda pada retry yang sudah selesai. Pertanyaan topik, kesimpulan, dan ringkasan membaca seluruh dokumen. Dokumen kecil diberikan langsung ke LLM; dokumen panjang memakai map/reduce bertahap yang mengikuti pertanyaan pengguna. Tiga giliran terakhir membantu pertanyaan seperti “jelaskan lebih sederhana”, tetapi jawaban lama tidak menjadi sumber fakta; mode kutipan menampilkan bagian dokumen dengan batas yang dijelaskan di UI.
 
 ### C. Koreksi Teks dan Versi Indeks
 
@@ -178,12 +176,13 @@ Operasi tersedia: **sum, average, min, max, count**. Format angka Indonesia dipe
 | Ekstraksi terstruktur | pdfplumber / Docling | Teks, tabel, halaman, dan posisi sumber |
 | OCR | RapidOCR; Tesseract pada Docling | Tesseract memerlukan traineddata bahasa yang sesuai |
 | Retrieval | BM25, E5/Qdrant, RRF | Dense/hybrid neural membutuhkan konfigurasi E5 dan Qdrant |
-| Jawaban bersumber | Extractive, Gemini, Ollama | Provider aktif terlihat di UI |
+| Jawaban bersumber | Extractive, Gemini, Ollama | Provider dapat diperiksa di bantuan dan metadata jawaban |
 | Chat beberapa dokumen | Scope 1–5 dokumen | Riwayat terikat pada sesi browser |
 | Koreksi dan reprocess | Versi ekstraksi immutable | Versi lama tetap tersedia untuk citations |
 | Perhitungan | Decimal + allowlist | Pemilihan tabel/kolom melalui UI jika ambigu |
 | Ekspor | JSON / Markdown | Hasil ekstraksi dapat diunduh |
-| Pemrosesan background | Executor lokal / Redis + RQ | Polling status, deduplikasi, retry eksplisit |
+| Pemrosesan background | Executor lokal / Redis + RQ | Progres halaman nyata, animasi, polling status, deduplikasi, retry |
+| Percakapan interaktif | Konteks 3 giliran terakhir | Overview, kesimpulan, ringkasan, dan penjelasan lanjutan |
 | Pengujian | pytest, smoke checks, CI | Hasil aktual dan batas verifikasi terdokumentasi |
 
 | Mode | Parser | Retrieval | Jawaban | Kebutuhan |
@@ -241,7 +240,7 @@ cp .env.example .env
 uv run --extra dev uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Buka **http://127.0.0.1:8000**, lalu klik **Coba dokumen contoh**. Swagger API tersedia di **http://127.0.0.1:8000/docs**.
+Buka **http://127.0.0.1:8000**, lalu unggah PDF milikmu atau `examples/sop-demo.pdf`. Swagger API tersedia di **http://127.0.0.1:8000/docs**.
 
 Pertanyaan yang bisa dicoba:
 
@@ -321,19 +320,39 @@ E5 menghasilkan 384 dimensi dan memakai prefix query/passage. Chunk neural dihit
 
 ### Model lokal melalui Ollama
 
+Untuk langsung memakai profil OCR + chatbot lokal, salin `.env.ollama.example` menjadi `.env` dan pasang dependency `uv sync --extra ai --extra ocr`. Profil ini memakai BM25 dan konteks dokumen tanpa layanan Qdrant tambahan.
+
 Pasang [Ollama](https://ollama.com/), lalu:
 
 ```bash
-ollama pull qwen3:8b
+ollama pull qwen3:4b
 ```
 
 ```dotenv
 LLM_PROVIDER=ollama
 OLLAMA_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen3:8b
+OLLAMA_MODEL=qwen3:4b
+LLM_TIMEOUT=240
 ```
 
-Ollama dipanggil dari backend dengan structured JSON. Ukuran model download berbeda dari kebutuhan memori runtime. Profilkan perangkat sebelum menjalankan OCR, embedding, reranker, dan LLM secara bersamaan.
+Pastikan layanan Ollama berjalan (`ollama serve` bila belum berjalan), lalu restart FastAPI agar perubahan `.env` terbaca. Periksa model dengan `ollama list`. Smoke check lokal memakai `qwen3:4b`. Jika memakai model lain, sesuaikan `OLLAMA_MODEL` dan ulangi pengujian karena kepatuhan format serta kualitas jawaban dapat berbeda.
+
+Ollama dipanggil dari backend dengan structured JSON, konteks 8192 token, dan temperature 0.2. PDF serta percakapan diproses melalui server lokal tanpa Gemini API key. Ukuran model download berbeda dari kebutuhan memori runtime. Profilkan perangkat sebelum menjalankan OCR, embedding, reranker, dan LLM secara bersamaan.
+
+Contoh pertanyaan setelah OCR siap:
+
+- “Dokumen ini membahas apa?” untuk jenis, tujuan, dan topik utama.
+- “Apa kesimpulannya?” untuk kesimpulan dari seluruh dokumen.
+- “Jelaskan lebih sederhana” untuk melanjutkan jawaban sebelumnya dengan bahasa sehari-hari.
+- “Apa syarat pengajuan cuti?” untuk detail dengan sumber halaman.
+
+OCR tidak melatih ulang model. Hasil teks dan tabel diberikan sebagai konteks saat menjawab; RAG memilih bukti dan server memeriksa referensi sumbernya. Dengan Ollama, proses generation berjalan di laptop. Untuk dokumen panjang, rangkuman bertahap memerlukan beberapa panggilan model dan bisa lebih lama.
+
+Jalankan pemeriksaan dengan model lokal asli:
+
+```bash
+uv run python -m scripts.smoke_chat --output docs/ollama-smoke.json
+```
 
 ### Reranker opsional
 
@@ -407,14 +426,15 @@ Lihat [catatan verifikasi](docs/VERIFICATION.md) untuk membedakan pemeriksaan ya
 
 | Pemeriksaan | Hasil | Cakupan |
 | :--- | :--- | :--- |
-| **Automated tests lokal** | **19 passed** | Workflow, isolasi sesi, citations, koreksi/reprocess, hitungan, idempotency, provider contract |
+| **Automated tests lokal** | **25 passed** | Workflow, isolasi sesi, citations, koreksi/reprocess, hitungan, idempotency, provider contract |
 | **Ruff & JavaScript syntax** | **Passed** | Kode Python dan semua ES modules frontend |
-| **Browser desktop & mobile** | **Diperiksa** | Upload, chat, perhitungan, klik sumber/highlight, viewport 390×844 |
+| **Browser desktop & mobile** | **Baseline diperiksa** | Upload/chat/citation pada 12 Oktober; pemeriksaan baru 15 Oktober terhenti karena URL browser tidak dapat diverifikasi |
 | **RapidOCR** | **Passed** | PDF scan sintetis dengan model OCR asli |
 | **Docling** | **Passed** | Teks dan satu tabel pada PDF sintetis |
 | **E5 + Qdrant in-memory** | **Passed** | Model asli, 384 dimensi, filter owner/versi |
 | **Pilot benchmark** | **7/8 checks passed** | Delapan pertanyaan sintetis; pemeriksaan substring |
-| **Gemini / Ollama** | **Kontrak/schema diperiksa** | Live generation belum diuji karena key/server belum tersedia |
+| **Gemini** | **Schema diperiksa** | API key belum tersedia untuk live generation |
+| **Ollama + Qwen3 4B lokal** | **Live generation diperiksa** | Overview, kesimpulan, dan pertanyaan lanjutan pada PDF sintetis; bukan benchmark akurasi |
 | **Qwen reranker / Docker stack** | **Belum diuji langsung** | Implementasi/configuration tersedia |
 
 Catatan lengkap: [VERIFICATION.md](docs/VERIFICATION.md). Hasil pilot adalah smoke benchmark, bukan klaim akurasi pada dokumen nyata. Kegagalan pertanyaan tentang nomor telepon yang tidak tercantum tetap dicatat dalam [hasil pilot](docs/pilot-results.json).

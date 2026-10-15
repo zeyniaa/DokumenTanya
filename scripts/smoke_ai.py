@@ -22,13 +22,13 @@ def main():
     started = time.perf_counter()
     with TemporaryDirectory(dir=settings().data_dir) as directory:
         if options.mode == "ocr":
-            content = parser.parse(ROOT / "examples/sop-scan-demo.pdf", Path(directory), lambda _: None)
+            content = parser.parse(ROOT / "examples/sop-scan-demo.pdf", Path(directory), lambda *args: None)
             text = " ".join(i["text"] for i in content["items"])
             assert "cuti" in text.lower(), text[:300]
             result = {"mode": "rapidocr", "passed": True, "item_count": len(content["items"]), "scan_pages": len(content["pages"])}
         elif options.mode == "docling":
             settings().parser_backend = "docling"
-            content = parser.parse(ROOT / "examples/sop-demo.pdf", Path(directory), lambda _: None)
+            content = parser.parse(ROOT / "examples/sop-demo.pdf", Path(directory), lambda *args: None)
             assert content["items"] and content["tables"]
             assert "CA-01" in " ".join(i["text"] for i in content["items"])
             result = {"mode": "docling", "passed": True, "table_count": len(content["tables"]), "quality": content["quality"]}

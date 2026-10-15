@@ -214,7 +214,7 @@ def create_app():
     @app.get("/api/documents/{document_id}/jobs")
     def document_jobs(request: Request, document_id: str):
         document_for(request, document_id)
-        return store.many("SELECT id,status,stage,error,created FROM jobs WHERE document_id=? ORDER BY created DESC LIMIT 1",
+        return store.many("SELECT id,document_id,status,stage,error,created,progress_percent,pages_done,pages_total,phase FROM jobs WHERE document_id=? ORDER BY created DESC LIMIT 1",
                           (document_id,))
 
     @app.post("/api/documents/{document_id}/retry", status_code=202)
@@ -389,7 +389,9 @@ def create_app():
                 warnings.extend(content["warnings"])
                 versions.append({"document_id": doc["id"], "version_id": version["id"], "number": version["number"]})
                 tables.extend((doc, version, table) for table in content["tables"])
-            previous = store.many("SELECT question FROM messages WHERE conversation_id=? AND status='complete' ORDER BY created", (conversation_id,))
+            previous = store.many("SELECT question,response FROM messages WHERE conversation_id=? AND status='complete' ORDER BY created", (conversation_id,))
+            chat_history = [{"question": entry["question"], "answer": json.loads(entry["response"])["answer"][:3000]}
+                            for entry in previous[-3:]]
             retrieval_question = generation.rewrite(question, previous[-3:])
             operation = next((op for pattern, op in [(r"\b(total|jumlah)\b", "sum"), (r"rata[- ]rata", "average"),
                                                       (r"\b(tertinggi|maksimum)\b", "max"), (r"\b(terendah|minimum)\b", "min")]
@@ -415,17 +417,25 @@ def create_app():
                               "filename": doc["name"], "page_no": table["page_no"],
                               "quote": parser.table_text(table["rows"]), "bboxes": [table["bbox"]]}]
                 answer_status = "answered"
-            elif operation:
+            elif operation and re.search(r"\b(hitung|berapa|total|rata[- ]rata|tertinggi|terendah|maksimum|minimum)\b", question.lower()):
                 answer = "Perhitungan belum bisa ditentukan dengan aman. Buka tab Tabel dan pilih tabel, kolom, serta operasi yang dimaksud."
                 citations, answer_status = [], "insufficient_evidence"
             else:
-                summary = bool(re.search(r"\b(ringkas|rangkuman|summary)\b", question.lower()) and "seluruh" in question.lower())
+                summary = generation.is_overview(question, previous[-3:])
                 candidates = chunks if summary else retrieval.retrieve(retrieval_question, chunks)
+                # Small documents fit entirely in context; semantic questions need not match exact words.
+                if config.llm_provider != "extractive" and len(generation.context(question, chunks, chat_history)) <= 18000:
+                    candidates = chunks
+                elif not summary and previous and generation.rewrite(question, previous[-3:]) != question:
+                    prior_ids = {c["chunk_id"] for c in json.loads(previous[-1]["response"])["citations"]}
+                    candidates = list({c["id"]: c for c in candidates + [c for c in chunks if c["id"] in prior_ids]}.values())
+                if not candidates and config.llm_provider != "extractive":
+                    summary, candidates = True, chunks
                 if summary:
-                    generated, usage, summary_warnings = generation.summarize(candidates)
+                    generated, usage, summary_warnings = generation.summarize(candidates, question, chat_history)
                     warnings.extend(summary_warnings)
                 else:
-                    generated, usage = generation.generate(retrieval_question, candidates)
+                    generated, usage = generation.generate(question, candidates, chat_history)
                 answer, citations = generation.format_answer(generated, candidates)
                 answer_status = generated.answer_status
             if config.llm_provider == "extractive" and not operation:

@@ -13,7 +13,7 @@
   <header class="topbar">
     <a class="brand" href="/" aria-label="DokumenTanya beranda"><span class="brand-icon">d<span>·</span></span><span>dokumen<span class="brand-light">tanya</span></span></a>
     <span class="header-caption">Dari dokumen, menjadi jawaban.</span>
-    <div class="header-right"><span class="mode-badge" id="mode-badge">Menghubungkan…</span><button class="icon-button" id="help-button" aria-label="Cara menggunakan">?</button></div>
+    <div class="header-right"><button class="icon-button" id="help-button" aria-label="Cara menggunakan">?</button></div>
   </header>
   <nav class="mobile-nav" aria-label="Navigasi workspace"><button class="active" data-mobile="documents">Dokumen</button><button data-mobile="viewer">Preview</button><button data-mobile="chat">Chat</button></nav>
   <main class="workspace" data-mobile-panel="documents">
@@ -24,9 +24,6 @@
         <input type="file" id="file-input" accept="application/pdf,.pdf" hidden>
       </label>
       <div class="document-list" id="document-list" aria-live="polite"></div>
-      <button class="demo-button" id="demo-button"><span>✦</span> Coba dokumen contoh <span>↗</span></button>
-      <div class="sidebar-note"><span class="note-icon">◎</span><p>Jawaban bisa diperiksa.<br><span>Setiap sumber terhubung ke halaman dokumen.</span></p></div>
-      <footer class="sidebar-footer">Document intelligence <span>v0.1</span></footer>
     </aside>
 
     <section class="viewer panel" aria-labelledby="viewer-title">
@@ -35,7 +32,7 @@
       <div class="job-banner" id="job-banner" role="status" hidden></div>
       <div class="extraction-warning" id="extraction-warning" hidden></div>
       <div class="viewer-body" id="viewer-body">
-        <div class="empty-state" id="viewer-empty"><div class="document-art"><span class="art-back"></span><span class="art-front"><i></i><i></i><i></i><b>✦</b></span></div><span class="eyebrow">RUANG UNTUK MEMAHAMI</span><h3>Dokumenmu punya banyak cerita.</h3><p>Unggah PDF, lihat isi dan tabelnya,<br>lalu temukan jawaban yang kamu butuhkan.</p><button class="button primary" id="empty-demo">Jelajahi dengan contoh <span>→</span></button><div class="capability-pills"><span>PDF & scan</span><span>Tabel</span><span>Bukti halaman</span></div></div>
+        <div class="empty-state" id="viewer-empty"><div class="document-art"><span class="art-back"></span><span class="art-front"><i></i><i></i><i></i><b>✦</b></span></div><span class="eyebrow">RUANG UNTUK MEMAHAMI</span><h3>Dokumenmu punya banyak cerita.</h3><p>Unggah PDF, lihat isi dan tabelnya,<br>lalu temukan jawaban yang kamu butuhkan.</p><button class="button primary" id="empty-upload">Unggah PDF <span>→</span></button><div class="capability-pills"><span>PDF & scan</span><span>Tabel</span><span>Bukti halaman</span></div></div>
         <div id="page-view" hidden><div class="paper" id="paper"><img id="page-image" alt="Halaman dokumen"><div id="highlight-layer" aria-hidden="true"></div></div></div>
         <div class="text-view" id="text-view" hidden></div>
         <div class="tables-view" id="tables-view" hidden></div>
@@ -47,12 +44,12 @@
       <div class="chat-heading"><div class="assistant-icon">✦</div><div><h2 id="chat-title">Tanya dokumen</h2><span id="chat-scope">Jawaban berdasarkan sumber</span></div><button class="icon-button" id="new-chat" aria-label="Percakapan baru" title="Percakapan baru" disabled>↺</button></div>
       <details class="scope-selector" id="scope-selector"><summary>Pilih dokumen untuk chat <span id="scope-count">0/5</span></summary><div id="scope-options"></div><button id="apply-scope" class="button secondary">Mulai chat dengan pilihan</button></details>
       <div class="messages" id="messages" role="log" aria-live="polite">
-        <div class="chat-welcome" id="chat-welcome"><span class="welcome-spark">✦</span><h3>Mulai dari rasa ingin tahu.</h3><p>Aku membantu menemukan informasi<br>dalam dokumen yang kamu pilih.</p><div class="suggestions"><button data-question="Apa persyaratan pengajuan cuti?">Apa persyaratan pengajuan cuti? <span>↗</span></button><button data-question="Ringkas seluruh dokumen ini">Ringkas seluruh dokumen ini <span>↗</span></button><button data-question="Berapa total biaya administrasi?">Berapa total biaya administrasi? <span>↗</span></button></div></div>
+        <div class="chat-welcome" id="chat-welcome"><span class="welcome-spark">✦</span><h3>Mulai dari rasa ingin tahu.</h3><p>Aku membantu menemukan informasi<br>dalam dokumen yang kamu pilih.</p><div class="suggestions"><button data-question="Dokumen ini membahas apa?">Dokumen ini membahas apa? <span>↗</span></button><button data-question="Ringkas seluruh dokumen ini">Ringkas seluruh dokumen ini <span>↗</span></button><button data-question="Apa kesimpulan dokumen ini?">Apa kesimpulan dokumen ini? <span>↗</span></button></div></div>
       </div>
       <div class="chat-bottom"><form id="chat-form"><label for="question-input" class="sr-only">Pertanyaan tentang dokumen</label><textarea id="question-input" placeholder="Unggah dokumen untuk mulai bertanya…" rows="2" maxlength="3000" disabled></textarea><div class="composer-footer"><span id="composer-hint">Jawaban disertai sumber</span><button id="send-button" type="submit" aria-label="Kirim pertanyaan" disabled>↑</button></div></form><p class="chat-disclaimer">AI dapat keliru. Periksa kutipan dan halaman sumber.</p></div>
     </section>
   </main>
   <div id="toast" class="toast" role="status" hidden></div>
-  <dialog id="help-dialog"><button class="dialog-close icon-button" id="close-help" aria-label="Tutup">×</button><span class="eyebrow">DOKUMENTANYA</span><h2>Baca. Tanya. Periksa.</h2><ol><li>Unggah PDF atau coba dokumen contoh.</li><li>Tunggu ekstraksi dan indeks siap.</li><li>Tanyakan isi dokumen di panel chat.</li><li>Klik sumber untuk memeriksa halaman bukti.</li><li>Koreksi teks di tab Teks; hitung angka di tab Tabel.</li></ol><p id="help-mode"></p><p class="muted">File dan percakapan terikat pada sesi browser. Menghapus cookie membuat sesi lama tidak dapat diakses dari browser ini.</p></dialog>
+  <dialog id="help-dialog"><button class="dialog-close icon-button" id="close-help" aria-label="Tutup">×</button><span class="eyebrow">DOKUMENTANYA</span><h2>Baca. Tanya. Periksa.</h2><ol><li>Unggah PDF yang ingin kamu pahami.</li><li>Tunggu ekstraksi dan indeks siap.</li><li>Tanyakan isi dokumen di panel chat.</li><li>Klik sumber untuk memeriksa halaman bukti.</li><li>Koreksi teks di tab Teks; hitung angka di tab Tabel.</li></ol><p id="help-mode"></p><p class="muted">File dan percakapan terikat pada sesi browser. Menghapus cookie membuat sesi lama tidak dapat diakses dari browser ini.</p></dialog>
 </body>
 </html>

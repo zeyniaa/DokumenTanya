@@ -14,8 +14,9 @@ LOCAL_TASKS = set()
 TASK_LOCK = threading.Lock()
 
 
-def progress(job_id, stage):
-    store.execute("UPDATE jobs SET stage=? WHERE id=?", (stage, job_id))
+def progress(job_id, stage, percent=0, pages_done=0, pages_total=0, phase="extract"):
+    store.execute("UPDATE jobs SET stage=?,progress_percent=?,pages_done=?,pages_total=?,phase=? WHERE id=?",
+                  (stage, percent, pages_done, pages_total, phase, job_id))
 
 
 def process_job(job_id):
@@ -35,8 +36,9 @@ def process_job(job_id):
             content = payload["content"]
         else:
             content = parser.parse(root / "original.pdf", root / "pages",
-                                   lambda stage: progress(job_id, stage))
-        progress(job_id, "Membuat indeks pencarian")
+                                   lambda *args: progress(job_id, *args))
+        total = len(content["pages"])
+        progress(job_id, "Membuat indeks pencarian", 100, total, total, "index")
         content["pipeline_config"] = {"parser": settings().parser_backend, "ocr_enabled": settings().ocr_enabled,
             "embedding_backend": settings().embedding_backend, "embedding_model": settings().embedding_model,
             "chunk_strategy": "grouped-items-token-bounded-v1"}
@@ -50,7 +52,7 @@ def process_job(job_id):
                        (version_id, document["id"], number, json.dumps(content, ensure_ascii=False), store.now()))
             db.execute("UPDATE documents SET active_version=?,status='ready',pages=? WHERE id=?",
                        (version_id, len(content["pages"]), document["id"]))
-            db.execute("UPDATE jobs SET status='ready',stage='Siap',finished=? WHERE id=?", (store.now(), job_id))
+            db.execute("UPDATE jobs SET status='ready',stage='Siap',progress_percent=100,phase='ready',finished=? WHERE id=?", (store.now(), job_id))
         logger.info(json.dumps({"event": "ingestion_ready", "document_id": document["id"],
                                "version_id": version_id, "seconds": round(time.perf_counter() - started, 3)}))
     except Exception as exc:

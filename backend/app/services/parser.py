@@ -26,7 +26,7 @@ def inspect_pdf(path):
     return count
 
 
-def render_pages(path, directory):
+def render_pages(path, directory, progress=None):
     directory.mkdir(parents=True, exist_ok=True)
     doc = pdfium.PdfDocument(path)
     pages = []
@@ -43,6 +43,8 @@ def render_pages(path, directory):
             image.close()
             bitmap.close()
             page.close()
+            if progress:
+                progress(f"Menyiapkan halaman {index + 1}/{len(doc)}", 0, 0, len(doc), "render")
     finally:
         doc.close()
     return pages
@@ -71,7 +73,7 @@ def image_ocr(image_path):
     return rows
 
 
-def lightweight_parse(path, pages, image_dir):
+def lightweight_parse(path, pages, image_dir, progress=None):
     items, tables, warnings = [], [], []
     with pdfplumber.open(path) as pdf:
         for page_no, page in enumerate(pdf.pages, start=1):
@@ -110,6 +112,9 @@ def lightweight_parse(path, pages, image_dir):
                     warnings.append(f"Halaman {page_no} memakai OCR; periksa angka dan tabel pada sumber.")
                 else:
                     warnings.append(f"Halaman {page_no} minim teks. Aktifkan OCR_ENABLED=true untuk scan.")
+            if progress:
+                progress(f"Membaca teks, tabel & OCR · {page_no}/{len(pages)} halaman",
+                         round(page_no / len(pages) * 100), page_no, len(pages), "extract")
     return {"pages": pages, "items": items, "tables": tables, "warnings": warnings,
             "parser": "pdfplumber", "quality": None}
 
@@ -136,11 +141,12 @@ def docling_converter():
     return DocumentConverter(format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=options)})
 
 
-def docling_parse(path, pages, image_dir):
-    result = docling_converter().convert(path)
+def docling_page(path, page, converter):
+    # Public page_range API preserves the original PDF page number/provenance.
+    result = converter.convert(path, page_range=(page["page_no"], page["page_no"]))
     doc = result.document
     items, tables, warnings = [], [], []
-    page_map = {p["page_no"]: p for p in pages}
+    page_map = {page["page_no"]: page}
     for index, (item, _) in enumerate(doc.iterate_items()):
         provenance = getattr(item, "prov", [])
         if not provenance:
@@ -152,7 +158,7 @@ def docling_parse(path, pages, image_dir):
             continue
         box = source.bbox.to_top_left_origin(page_height=dimensions["height"])
         normalized = bbox_normalized([box.l, box.t, box.r, box.b], dimensions["width"], dimensions["height"])
-        item_id = f"item-{index}"
+        item_id = f"item-{page_no}-{index}"
         if hasattr(item, "export_to_dataframe"):
             frame = item.export_to_dataframe(doc=doc)
             rows = [[str(c) for c in frame.columns]] + frame.fillna("").astype(str).values.tolist()
@@ -166,17 +172,35 @@ def docling_parse(path, pages, image_dir):
     if getattr(result, "confidence", None):
         quality = str(result.confidence.mean_grade)
         warnings.append("Grade konversi membantu pemeriksaan OCR; bukan confidence jawaban chatbot.")
-    return {"pages": pages, "items": items, "tables": tables, "warnings": warnings,
+    return {"items": items, "tables": tables, "warnings": warnings,
             "parser": "docling", "quality": quality, "docling_document": doc.export_to_dict()}
 
 
+def docling_parse(path, pages, image_dir, progress=None):
+    output = {"pages": pages, "items": [], "tables": [], "warnings": [],
+              "parser": "docling", "quality": {}, "docling_pages": []}
+    converter = docling_converter()
+    for page in pages:
+        part = docling_page(path, page, converter)
+        for key in ("items", "tables", "warnings"):
+            output[key].extend(part[key])
+        output["quality"][str(page["page_no"])] = part["quality"]
+        output["docling_pages"].append(part["docling_document"])
+        if progress:
+            done = page["page_no"]
+            progress(f"Membaca teks, tabel & OCR · {done}/{len(pages)} halaman",
+                     round(done / len(pages) * 100), done, len(pages), "extract")
+    output["warnings"] = list(dict.fromkeys(output["warnings"]))
+    return output
+
+
 def parse(path: Path, directory: Path, progress):
-    inspect_pdf(path)
-    progress("Merender halaman")
-    pages = render_pages(path, directory)
-    progress("Membaca struktur dan OCR")
+    total = inspect_pdf(path)
+    progress("Menyiapkan halaman", 0, 0, total, "render")
+    pages = render_pages(path, directory, progress)
+    progress("Memuat model pembaca, lalu memulai OCR", 0, 0, total, "extract")
     output = (docling_parse if settings().parser_backend == "docling" else lightweight_parse)(
-        path, pages, directory)
+        path, pages, directory, progress)
     if not any(item["text"].strip() for item in output["items"]):
         raise ValueError("Tidak ditemukan teks. Aktifkan OCR atau unggah scan yang lebih jelas.")
     output["items"].sort(key=lambda item: (item["page_no"], item["bbox"][1]))

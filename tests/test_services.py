@@ -36,10 +36,10 @@ def test_unknown_source_cannot_be_formatted():
 def test_summary_preserves_original_provenance(monkeypatch, client):
     from backend.app.config import settings
     settings().llm_provider = "ollama"
-    def fake_generate(question, candidates):
+    def fake_generate(question, candidates, history=None):
         return GeneratedAnswer(answer_status="answered", claims=[Claim(text="A supported summary", source_ids=[c["id"] for c in candidates])]), {"input_tokens": 10}
     monkeypatch.setattr(generation, "generate", fake_generate)
-    chunks = [{"id": f"source-{i}", "text": f"fact {i}"} for i in range(40)]
+    chunks = [{"id": f"source-{i}", "text": f"fact {i} " * 100, "filename": "test.pdf", "page_no": i + 1} for i in range(40)]
     answer, usage, _ = generation.summarize(chunks)
     assert set(answer.claims[0].source_ids) == {c["id"] for c in chunks}
     assert usage["input_tokens"] == 60

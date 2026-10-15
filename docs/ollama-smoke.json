@@ -1,0 +1,44 @@
+{
+  "provider": "ollama",
+  "model": "qwen3:4b",
+  "passed": true,
+  "scope": "Four synthetic smoke questions; not an accuracy benchmark",
+  "results": [
+    {
+      "question": "Dokumen ini membahas apa?",
+      "answer": "Dokumen ini adalah panduan administrasi akademik yang dibuat untuk demonstrasi dan pengujian aplikasi DokumenTanya. [1, 2]\n\nTujuan utamanya adalah memberikan panduan prosedur pengajuan cuti akademik, biaya layanan administrasi, pengembalian biaya, dan kontak layanan. [1, 3, 2]",
+      "answer_status": "answered",
+      "source_pages": [
+        1,
+        2
+      ],
+      "seconds": 26.15
+    },
+    {
+      "question": "Apa kesimpulannya?",
+      "answer": "Dokumen ini adalah panduan administrasi akademik yang dibuat untuk demonstrasi dan pengujian aplikasi DokumenTanya. Tidak ada kebijakan kampus nyata yang terlibat. [1, 2]\n\nPengajuan cuti akademik memerlukan formulir CA-01, surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi. Proses verifikasi membutuhkan 5 hari kerja setelah dokumen lengkap diterima. [1]",
+      "answer_status": "answered",
+      "source_pages": [
+        1,
+        2
+      ],
+      "seconds": 34.02
+    },
+    {
+      "question": "Jelaskan lebih sederhana",
+      "answer": "Dokumen ini adalah panduan administrasi akademik untuk demonstrasi aplikasi DokumenTanya, bukan kebijakan kampus nyata. [1]\n\nPengajuan cuti akademik memerlukan formulir CA-01, surat permohonan, persetujuan dosen wali, dan bukti bebas tunggakan administrasi, dengan proses verifikasi dalam 5 hari kerja. [1]",
+      "answer_status": "answered",
+      "source_pages": [
+        1
+      ],
+      "seconds": 33.56
+    },
+    {
+      "question": "Siapa presiden Republik Indonesia saat ini?",
+      "answer": "Bukti dalam dokumen belum cukup untuk menjawab pertanyaan ini. Coba sebutkan istilah atau bagian yang lebih spesifik.",
+      "answer_status": "insufficient_evidence",
+      "source_pages": [],
+      "seconds": 19.22
+    }
+  ]
+}

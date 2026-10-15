@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-3.5-flash-lite"
     gemini_api_key: str = ""
     ollama_url: str = "http://127.0.0.1:11434"
-    ollama_model: str = "qwen3:8b"
+    ollama_model: str = "qwen3:4b"
     reranker_enabled: bool = False
     reranker_model: str = "Qwen/Qwen3-Reranker-0.6B"
     qdrant_url: str = ""
